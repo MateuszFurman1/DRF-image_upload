@@ -1,12 +1,8 @@
-from dataclasses import field
-from django.forms import CharField, EmailField
+from django.forms import CharField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.serializers import ModelSerializer
-from users.models import CustomUser
-from rest_framework.validators import UniqueValidator
+from Core import settings
 from rest_framework.exceptions import ValidationError
-from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth import get_user_model
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -22,59 +18,34 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 
+User = settings.AUTH_USER_MODEL
+
+
 class RegisterSerializer(ModelSerializer):
-    password = CharField(write_only=True)
-    password_confirmation = CharField(write_only=True)
+    password_confirmation = CharField(required=True)
+    first_name = CharField(required=True)
+    password = CharField(required=True)
+    email = CharField(required=True)
 
     class Meta:
-        model = CustomUser
-        fields = ('email', 'password', 'password_confirmation', 'first_name')
-        extra_kwargs = {'password': {'write_only': True}}
+        model = User
+        fields = (
+            'first_name', 'password', 'password_confirmation',
+            'email'
+        )
 
     def validate(self, data):
-        password = data.get('password')
-        password_confirmation = data.pop('password_confirmation')
-
-        if password != password_confirmation:
-            raise ValidationError("Passwords do not match.")
-
+        if data['password'] != data['password_confirmation']:
+            raise ValidationError({'error_message': 'Passwords do not match'})
         return data
 
     def create(self, validated_data):
-        password = validated_data.pop('password')
-        validated_data.pop('password_confirmation')
-        user = self.Meta.model(**validated_data)
-        user.set_password(password)
+        user: User = User.objects.create(
+            first_name=validated_data.get('first_name'),
+            email=validated_data.get('email'),
+        )
+
+        user.set_password(validated_data.get('password'))
         user.save()
+
         return user
-    # email = EmailField(
-    #     required=True,
-    #     validators=[UniqueValidator(queryset=CustomUser.objects.all())]
-    # )
-    # password = CharField(
-    #     required=True,
-    #     validators=[validate_password]
-    # )
-
-    # class Meta:
-    #     model = CustomUser
-    #     fields = (
-    #         'first_name', 'email',
-    #         'password', 'password_confirmation',
-    #     )
-
-    # def validate(self, data):
-    #     if data['password'] != data['password_confirmation']:
-    #         raise ValidationError({'error_message': 'Passwords do not match'})
-    #     return data
-
-    # def create(self, validated_data):
-    #     user: CustomUser = CustomUser.objects.create(
-    #         email=validated_data.get('email'),
-    #         first_name=validated_data.get('first_name'),
-    #     )
-
-    #     user.set_password(validated_data.get('password'))
-    #     user.save()
-
-    #     return user
