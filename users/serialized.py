@@ -1,8 +1,7 @@
-from django.forms import CharField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.serializers import ModelSerializer
-from Core import settings
-from rest_framework.exceptions import ValidationError
+from rest_framework import serializers
+from users.models import CustomUser
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -18,29 +17,25 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 
-User = settings.AUTH_USER_MODEL
-
-
 class RegisterSerializer(ModelSerializer):
-    password_confirmation = CharField(required=True)
-    first_name = CharField(required=True)
-    password = CharField(required=True)
-    email = CharField(required=True)
+    password_confirmation = serializers.CharField(write_only=True, required=True)
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
-            'first_name', 'password', 'password_confirmation',
-            'email'
+            'first_name', 'email', 'password', 'password_confirmation'
         )
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
 
     def validate(self, data):
         if data['password'] != data['password_confirmation']:
-            raise ValidationError({'error_message': 'Passwords do not match'})
+            raise serializers.ValidationError('Passwords do not match')
         return data
 
     def create(self, validated_data):
-        user: User = User.objects.create(
+        user = CustomUser.objects.create(
             first_name=validated_data.get('first_name'),
             email=validated_data.get('email'),
         )

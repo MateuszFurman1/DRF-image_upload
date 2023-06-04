@@ -17,11 +17,12 @@ class RegisterView(CreateAPIView):
     # permission_classes = (AllowAny, )
 
     def create(self, request, *args, **kwargs):
-        serializer: RegisterSerializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user: User = serializer.save()
-        
+        user = serializer.create(
+            validated_data=serializer.validated_data
+        )
         refresh = MyTokenObtainPairSerializer.get_token(user)
 
         return Response({
