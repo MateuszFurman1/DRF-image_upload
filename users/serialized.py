@@ -44,3 +44,18 @@ class RegisterSerializer(ModelSerializer):
         user.save()
 
         return user
+    
+    
+class UserChangePasswordSerializer(serializers.Serializer):
+    password_confirmation = serializers.CharField(write_only=True,
+                                                style={'input_type':'password'}, required=True)
+    class Meta:
+        fields = ['password', 'password_confirmation']
+    
+    def validate(self, data):
+        user = self.context.get('user')
+        if data['password'] != data['password_confirmation']:
+            raise serializers.ValidationError('Passwords do not match')
+        user.set_password(data.get('password'))
+        user.save()
+        return data
