@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.renderers import JSONRenderer
 
 
+
 User = settings.AUTH_USER_MODEL
 
 
@@ -31,27 +32,29 @@ class LoginView(TokenObtainPairView):
 
 
 class RegisterView(CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
     serializer_class = serialized.RegisterSerializer
-    permission_classes = [AllowAny]
+# class RegisterView(CreateAPIView):
+#     serializer_class = serialized.RegisterSerializer
+#     permission_classes = [AllowAny]
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
 
-        user = serializer.create(
-            validated_data=serializer.validated_data
-        )
-        refresh = serialized.MyTokenObtainPairSerializer.get_token(user)
+#         user = serializer.create(
+#             validated_data=serializer.validated_data)
+#         refresh = serialized.MyTokenObtainPairSerializer.get_token(user)
 
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, status=status.HTTP_201_CREATED)
+#         return Response({
+#             'refresh': (refresh),
+#             'access': (refresh.access_token),
+#         }, status=status.HTTP_201_CREATED)
         
         
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
-    renderer_classes = [UserRenderer]
   
     def post(self, request, format=None):
         serializer = serialized.ProfileSerializer(data=request.user)

@@ -29,7 +29,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     password_confirmation = serializers.CharField(write_only=True, required=True)
 
     class Meta:
-        model = User
+        model = settings.AUTH_USER_MODEL
         fields = (
             'first_name', 'email', 'password', 'password_confirmation'
         )
@@ -56,7 +56,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     
 class ProfileSerializer(serializers.ModelSerializer):
   class Meta:
-    model = User
+    model = settings.AUTH_USER_MODEL
     fields = ('first_name', 'email')
     
     
