@@ -11,9 +11,6 @@ from django.utils.encoding import smart_str
 from users.models import CustomUser
 
 
-User = settings.AUTH_USER_MODEL
-
-
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     
     @classmethod
@@ -43,7 +40,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        user = User.objects.create(
+        user = CustomUser.objects.create(
             first_name=validated_data.get('first_name'),
             email=validated_data.get('email'),
         )
@@ -82,8 +79,8 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
     def validate(self, data):
         email = data.get('email')
         try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
             raise serializers.ValidationError('You are not a registered user.')
 
         uid = urlsafe_base64_encode(force_bytes(user.pk)).decode()
@@ -115,8 +112,8 @@ class PasswordResetSerializer(serializers.Serializer):
 
         try:
             user_id = smart_str(urlsafe_b64decode(uid))
-            user = User.objects.get(id=user_id)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = CustomUser.objects.get(id=user_id)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
             raise serializers.ValidationError('Invalid user ID')
 
         if not PasswordResetTokenGenerator().check_token(user, token):
