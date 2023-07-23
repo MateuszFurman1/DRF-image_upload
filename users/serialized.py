@@ -8,6 +8,8 @@ from django.utils.http import urlsafe_base64_encode
 from django.core.mail import send_mail
 from django.utils.encoding import smart_str
 
+from users.models import CustomUser
+
 
 User = settings.AUTH_USER_MODEL
 
@@ -26,19 +28,17 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password_confirmation = serializers.CharField(write_only=True, required=True)
-
+    password_confirmation = serializers.CharField(style={'input_type':'password'}, write_only=True)
+    
     class Meta:
-        model = settings.AUTH_USER_MODEL
-        fields = (
-            'first_name', 'email', 'password', 'password_confirmation'
-        )
-        extra_kwargs = {
-            'password': {'write_only': True},
-        }
+        model = CustomUser
+        fields = ('first_name', 'email', 'password', 'password_confirmation')
+        extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, data):
-        if data['password'] != data['password_confirmation']:
+        password = data.get('password')
+        password_confirmation = data.get('password_confirmation')
+        if password != password_confirmation:
             raise serializers.ValidationError('Passwords do not match')
         return data
 

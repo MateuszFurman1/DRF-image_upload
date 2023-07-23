@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.renderers import JSONRenderer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 
@@ -31,17 +32,37 @@ class LoginView(TokenObtainPairView):
 
 
 
-class RegisterView(CreateAPIView):
-    queryset = User.objects.all()
-    permission_classes = (AllowAny,)
-    serializer_class = serialized.RegisterSerializer
+def get_tokens_for_user(user):
+  refresh = RefreshToken.for_user(user)
+  return {
+      'refresh': str(refresh),
+      'access': str(refresh.access_token),
+  }
+
+class RegisterView(APIView):
+  renderer_classes = [UserRenderer]
+  def post(self, request, format=None):
+    serializer = serialized.RegisterSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.create(serializer.validated_data)
+    token = get_tokens_for_user(user)
+    return Response({'token':token, 'msg':'Registration Successful'}, status=status.HTTP_201_CREATED)
+ 
+
 # class RegisterView(CreateAPIView):
-#     serializer_class = serialized.RegisterSerializer
+    
 #     permission_classes = [AllowAny]
+#     serializer_class = serialized.RegisterSerializer
 
 #     def create(self, request, *args, **kwargs):
 #         serializer = self.get_serializer(data=request.data)
 #         serializer.is_valid(raise_exception=True)
+        
+#         # user = serializer.save()
+#         # token = RefreshToken.for_user(user)
+#         # data = serializer.data
+#         # data["tokens"] = {"refresh": str(token), "access": str(token.access_token)}
+#         # return Response(data, status=status.HTTP_201_CREATED)
 
 #         user = serializer.create(
 #             validated_data=serializer.validated_data)
@@ -49,9 +70,9 @@ class RegisterView(CreateAPIView):
 
 #         return Response({
 #             'refresh': (refresh),
-#             'access': (refresh.access_token),
+#             'access': (refresh.access_token)
 #         }, status=status.HTTP_201_CREATED)
-        
+
         
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
