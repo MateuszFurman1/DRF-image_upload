@@ -31,16 +31,18 @@ class RegisterView(CreateAPIView):
             'access': str(refresh.access_token)
         }, status=status.HTTP_201_CREATED)
 
-        
+
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
   
     def post(self, request, format=None):
-        serializer = serialized.ProfileSerializer(data=request.user)
+        user_data = {'first_name': request.user.first_name,
+                     'email': request.user.email}
+        serializer = serialized.ProfileSerializer(data=user_data)
         serializer.is_valid(raise_exception=True)
         serialized_data = serializer.data
         return Response(serialized_data, status=status.HTTP_200_OK)
-    
+  
     
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]

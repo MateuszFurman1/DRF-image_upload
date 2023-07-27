@@ -7,7 +7,6 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.core.mail import send_mail
 from django.utils.encoding import smart_str
-
 from users.models import CustomUser
 
 
@@ -53,7 +52,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     
 class ProfileSerializer(serializers.ModelSerializer):
   class Meta:
-    model = settings.AUTH_USER_MODEL
+    model = CustomUser
     fields = ('first_name', 'email')
     
     
