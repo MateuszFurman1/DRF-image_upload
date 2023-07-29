@@ -1,7 +1,6 @@
 from base64 import urlsafe_b64decode
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
-from Core import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -63,16 +62,18 @@ class ChangePasswordSerializer(serializers.Serializer):
     class Meta:
         fields = ['password', 'password_confirmation']
     
-    def validate(self, data):
+    def create(self, data):
         user = self.context.get('user')
         if data['password'] != data['password_confirmation']:
             raise serializers.ValidationError('Passwords do not match')
+        if user.check_password(data.get('password')) or user.check_password(data.get('password_confirmation')):
+            raise serializers.ValidationError('Passwords are the same as old one')
         user.set_password(data.get('password'))
         user.save()
-        return data
+        return data   
     
 
-class SendPasswordResetEmailSerializer(serializers.Serializer):
+class SendPasswordResetEmailSerializer(serializers.Serializer):  # noqa: E999
     email = serializers.EmailField(max_length=255)
 
     def validate(self, data):

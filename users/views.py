@@ -35,11 +35,8 @@ class RegisterView(CreateAPIView):
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
   
-    def post(self, request, format=None):
-        user_data = {'first_name': request.user.first_name,
-                     'email': request.user.email}
-        serializer = serialized.ProfileSerializer(data=user_data)
-        serializer.is_valid(raise_exception=True)
+    def get(self, request, format=None):
+        serializer = serialized.ProfileSerializer(request.user)
         serialized_data = serializer.data
         return Response(serialized_data, status=status.HTTP_200_OK)
   
