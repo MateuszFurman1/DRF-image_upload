@@ -145,8 +145,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=90),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
@@ -194,3 +194,6 @@ CORS_ALLOW_METHODS = (
 )
 
 CORS_ALLOW_ALL_ORIGINS = False
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

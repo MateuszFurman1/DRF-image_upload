@@ -56,7 +56,7 @@ class ChangePasswordView(APIView):
         
 
 class SendPasswordResetEmailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request, format=None):
         serializer = serialized.SendPasswordResetEmailSerializer(data=request.data)

@@ -83,7 +83,7 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):  # noqa: E999
         except CustomUser.DoesNotExist:
             raise serializers.ValidationError('You are not a registered user.')
 
-        uid = urlsafe_base64_encode(force_bytes(user.pk)).decode()
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = PasswordResetTokenGenerator().make_token(user)
         reset_link = f'http://localhost:3000/api/user/reset/{uid}/{token}'
 
